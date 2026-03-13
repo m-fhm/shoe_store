@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoleStyle | Premium Shoes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .shoe-card { transition: transform 0.2s; }
+        .shoe-card:hover { transform: scale(1.05); }
+        .hero-section { background: #f8f9fa; padding: 60px 0; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">SOLESTYLE</a>
+    </div>
+</nav>
+
+<header class="hero-section text-center">
+    <div class="container">
+        <h1>Step Into the Future</h1>
+        <p class="lead">Premium comfort for every journey.</p>
+    </div>
+</header>
+
+<main class="container my-5">
+    <div class="row">
+        {% for shoe in shoes %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shoe-card shadow-sm">
+                <img src="{{ shoe.image }}" class="card-img-top" alt="{{ shoe.name }}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ shoe.name }}</h5>
+                    <p class="card-text text-muted">${{ shoe.price }}</p>
+                    <button class="btn btn-outline-dark">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+<footer class="py-4 bg-light text-center">
+    <p>&copy; 2026 SoleStyle Brand</p>
+</footer>
+
+</body>
+</html>
