@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Copy files to VM
+      # 2️⃣ Copy files to VM
       - name: Copy files to Azure VM
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -22,20 +22,43 @@ jobs:
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
           source: "./*"
           target: "/home/azureuser/myapp"
+          overwrite: true
 
-      # Step 3: SSH and run app in background
-      - name: Run app.py on VM
+      # 3️⃣ SSH into VM and deploy properly
+      - name: Deploy & Run App on VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_IP_ADDRESS }}
           username: azureuser
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
           script: |
+            set -e
+
             cd /home/azureuser/myapp
 
-            # Kill old process if running
-            pkill -f app.py || true
-            # Run with nohup, redirect ALL streams, and disown the process
-            nohup python3 app.py </dev/null >app.log 2>&1 & 
-            sleep 2
-            echo "App deployed and running in background"
+            echo "📦 Setting up virtual environment (if not exists)..."
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+
+            source venv/bin/activate
+
+            echo "📥 Installing dependencies..."
+            pip install --upgrade pip
+            if [ -f requirements.txt ]; then
+              pip install -r requirements.txt
+            fi
+
+            echo "🛑 Stopping old app..."
+            pkill -f "python3 app.py" || true
+
+            echo "🚀 Starting app..."
+            nohup venv/bin/python app.py > app.log 2>&1 &
+            disown
+
+            sleep 3
+
+            echo "🔍 Checking running processes..."
+            ps aux | grep app.py | grep -v grep || echo "❌ App not running"
+
+            echo "✅ Deployment complete"
