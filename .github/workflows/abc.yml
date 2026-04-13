@@ -35,8 +35,7 @@ jobs:
 
             # Kill old process if running
             pkill -f app.py || true
-
-            # Run app in background
-            nohup python app.py > app.log 2>&1 &
-
+            # Run with nohup, redirect ALL streams, and disown the process
+            nohup python3 app.py </dev/null >app.log 2>&1 & 
+            sleep 2
             echo "App deployed and running in background"
