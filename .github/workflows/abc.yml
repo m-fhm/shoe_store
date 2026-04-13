@@ -1,0 +1,42 @@
+name: Deploy Python App to Azure VM (No Docker)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Copy files to VM
+      - name: Copy files to Azure VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_IP_ADDRESS }}
+          username: azureuser
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          source: "./*"
+          target: "/home/azureuser/myapp"
+
+      # Step 3: SSH and run app in background
+      - name: Run app.py on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_IP_ADDRESS }}
+          username: azureuser
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          script: |
+            cd /home/azureuser/myapp
+
+            # Kill old process if running
+            pkill -f app.py || true
+
+            # Run app in background
+            nohup python app.py > app.log 2>&1 &
+
+            echo "App deployed and running in background"
