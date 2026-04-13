@@ -32,9 +32,6 @@ jobs:
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
           script: |
             cd /home/azureuser/myapp
-            # Kill old process if running
-            pkill -f app.py || true
             # Run and fully detach
-            nohup python3 app.py > app.log 2>&1 &
-            disown
+            nohup python3 app.py > &
             echo "App deployed and running in background"
